@@ -1,0 +1,68 @@
+import math
+
+# 재질별 밀도 (g/cm³)
+density_dict = {
+    "유리": 2.4,
+    "알루미늄": 2.7,
+    "탄소강": 7.85
+}
+
+GRAVITY_RATIO = 0.38
+
+def sphere_area(diameter, material="유리", thickness=1):
+    radius = diameter / 2  
+    area = 2 * math.pi * (radius ** 2)  # 반구의 겉면적 (m²)
+    area_cm2 = area * 10000  # m² -> cm²
+
+    if material not in density_dict:
+        raise ValueError("지원하지 않는 재질입니다.")
+
+    density = density_dict[material]
+    weight_g = area_cm2 * thickness * density
+    weight_kg = (weight_g / 1000) * GRAVITY_RATIO 
+
+    return round(area, 3), round(weight_kg, 3)
+
+def main():
+    print("=== 반구 무게 계산기 ===")
+    while True:
+        try:
+            diameter_input = input("\n돔의 지름을 입력하세요 (단위: m) [종료: q]: ")
+            if diameter_input.lower() in ['q', 'exit']:
+                print("프로그램을 종료합니다.")
+                break
+
+            try:
+                diameter_value = float(diameter_input)
+                if diameter_value <= 0:
+                    print("[오류] 지름은 0보다 커야 합니다.")
+                    continue
+            except ValueError:
+                print("[오류] 숫자만 입력해주세요.")
+                continue
+
+
+            material_input = input("재질을 입력하세요 (유리, 알루미늄, 탄소강) [기본값: 유리]: ") or "유리"
+            thickness_input = input("두께를 입력하세요 (단위: cm) [기본값: 1]: ") 
+            
+            try:
+                thickness_value = float(thickness_input) if thickness_input else 1
+                if thickness_value <= 0:
+                    print("[오류] 두께는 0보다 커야 합니다.")
+                    continue
+            except ValueError:
+                print("[오류] 두께는 숫자만 입력해주세요.")
+                continue
+
+
+            area, weight = sphere_area(diameter_value, material_input, thickness_value)
+            print(f"재질: {material_input}, 지름: {diameter_value} m, 두께: {thickness_value} cm")
+            print(f"면적: {area:.3f} m², 무게: {weight:.3f} kg")
+
+        except ValueError as e:
+            print(f"[오류] 잘못된 입력: {e}")
+        except Exception as e:
+            print(f"[예기치 못한 오류] {e}")
+
+if __name__ == "__main__":
+    main()
