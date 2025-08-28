@@ -1,0 +1,53 @@
+import os
+import zipfile
+import cv2
+
+class MasImageHelper:
+    def __init__(self, zip_path, extract_dir="CCTV"):
+        self.zip_path = zip_path
+        self.extract_dir = extract_dir
+        self.images = []
+        self.index = 0
+        self._prepare_images()
+
+    def _prepare_images(self):
+        if not os.path.exists(self.extract_dir):
+            with zipfile.ZipFile(self.zip_path, 'r') as zip_ref:
+                zip_ref.extractall(self.extract_dir)
+
+        exts = (".jpg", ".jpeg", ".png", ".bmp")
+        self.images = sorted(
+            [os.path.join(self.extract_dir, f) for f in os.listdir(self.extract_dir)
+             if f.lower().endswith(exts)]
+        )
+
+        if not self.images:
+            raise FileNotFoundError("CCTV 폴더에 이미지가 없습니다.")
+
+    def show_images(self):
+        while True:
+            img = cv2.imread(self.images[self.index])
+            if img is None:
+                print(f"이미지를 읽을 수 없습니다: {self.images[self.index]}")
+                break
+
+            cv2.imshow("CCTV Viewer", img)
+            key = cv2.waitKey(0) & 0xFF  # 키 값 정리
+
+            # 키 값 출력 (디버깅용)
+            print("Key pressed:", key)
+
+            if key == 27:  # ESC → 종료
+                break
+            elif key in [ord('a'), 81, 2424832]:  # 왼쪽
+                self.index = (self.index - 1) % len(self.images)
+            elif key in [ord('d'), 83, 2555904]:  # 오른쪽
+                self.index = (self.index + 1) % len(self.images)
+
+        cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    zip_file = r"C:\Users\SangAh\Desktop\python\part2\cctv.zip"
+    viewer = MasImageHelper(zip_file)
+    viewer.show_images()
